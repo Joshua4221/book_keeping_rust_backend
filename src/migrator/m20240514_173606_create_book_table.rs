@@ -30,7 +30,7 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                        .name("fk-book-user-id")
+                        .name("fk-book-user_id")
                         .from(Book::Table, Book::UserId)
                         .to(User::Table, User::Id)
                     )
@@ -41,19 +41,23 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                        .name("fk-book-author-id")
+                        .name("fk-book-author_id")
                         .from(Book::Table, Book::AuthorId)
                         .to(Author::Table, Author::Id)
                     )
                     .col(ColumnDef::new(Book::Title).string().not_null())
                     .col(ColumnDef::new(Book::Year).string().not_null())
                     .col(ColumnDef::new(Book::Cover).string().not_null())
-                    .col(ColumnDef::new(Book::CreatedAt).timestamp().extra("DEFAULT_CURRENT_TIMESTAMP".to_owned()))
-                    .col(ColumnDef::new(Book::UpdatedAt).timestamp().extra("DEFAULT_CURRENT_TIMESTAMP".to_owned()))
+                    .col(ColumnDef::new(Book::CreatedAt).timestamp().extra("DEFAULT CURRENT_TIMESTAMP".to_owned()))
+                    .col(ColumnDef::new(Book::UpdatedAt).timestamp().extra("DEFAULT CURRENT_TIMESTAMP".to_owned()))
                     .to_owned(),
             )
             .await
     }
+
+
+
+    
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
     

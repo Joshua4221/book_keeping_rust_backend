@@ -29,19 +29,22 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                        .name("fk-author-user-id")
+                        .name("fk-author-user_id")
                         .from(Author::Table, Author::UserId)
                         .to(User::Table, User::Id)
                     )
                     .col(ColumnDef::new(Author::Firstname).string().not_null())
                     .col(ColumnDef::new(Author::Lastname).string().not_null())
                     .col(ColumnDef::new(Author::Bio).string().not_null())
-                    .col(ColumnDef::new(Author::CreatedAt).timestamp().extra("DEFAULT_CURRENT_TIMESTAMP".to_owned()))
-                    .col(ColumnDef::new(Author::UpdatedAt).timestamp().extra("DEFAULT_CURRENT_TIMESTAMP".to_owned()))
+                    .col(ColumnDef::new(Author::CreatedAt).timestamp().extra("DEFAULT CURRENT_TIMESTAMP".to_owned()))
+                    .col(ColumnDef::new(Author::UpdatedAt).timestamp().extra("DEFAULT CURRENT_TIMESTAMP".to_owned()))
                     .to_owned(),
             )
             .await
     }
+
+
+    
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
      
