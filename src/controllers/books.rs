@@ -1,36 +1,38 @@
-
-
 use std::time::SystemTime;
 
 use prelude::DateTimeUtc;
-use rocket::{http::Status, serde::{json::Json, Deserialize, Serialize}, State};
+use rocket::{
+    http::Status,
+    serde::{json::Json, Deserialize, Serialize},
+    State,
+};
 use sea_orm::*;
 
 use crate::auth::AuthenicatedUser;
-use crate::entities::{prelude::*, book};
+use crate::entities::{book, prelude::*};
 
 use super::{Response, SuccessResponse};
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct ResBook {
-   pub id: i32,
-   pub author_id: i32,
-   pub title: String,
-   pub year: String,
-   pub cover: String,
+    pub id: i32,
+    pub author_id: i32,
+    pub title: String,
+    pub year: String,
+    pub cover: String,
 }
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
-pub struct ResBooklist{
-   pub total: usize,
-   pub book: Vec<ResBook>
+pub struct ResBooklist {
+    pub total: usize,
+    pub book: Vec<ResBook>,
 }
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct ReqBook{
+pub struct ReqBook {
     author_id: i32,
     title: String,
     year: String,
@@ -38,13 +40,22 @@ pub struct ReqBook{
 }
 
 impl From<&book::Model> for ResBook {
-    fn from(b: &book::Model) -> Self{
-        Self { id: b.id, author_id: b.author_id, title: b.title.to_owned(), year: b.year.to_owned(), cover: b.cover.to_owned() }
+    fn from(b: &book::Model) -> Self {
+        Self {
+            id: b.id,
+            author_id: b.author_id,
+            title: b.title.to_owned(),
+            year: b.year.to_owned(),
+            cover: b.cover.to_owned(),
+        }
     }
 }
 
 #[get("/")]
-pub async fn index(db: &State<DatabaseConnection>, _user: AuthenicatedUser) -> Response<Json<ResBooklist>> {
+pub async fn index(
+    db: &State<DatabaseConnection>,
+    _user: AuthenicatedUser,
+) -> Response<Json<ResBooklist>> {
     let db = db as &DatabaseConnection;
 
     let books = Book::find()
@@ -55,11 +66,21 @@ pub async fn index(db: &State<DatabaseConnection>, _user: AuthenicatedUser) -> R
         .map(ResBook::from)
         .collect::<Vec<_>>();
 
-    Ok(SuccessResponse((Status::Ok, Json(ResBooklist{total: books.len(), book:books}))))
+    Ok(SuccessResponse((
+        Status::Ok,
+        Json(ResBooklist {
+            total: books.len(),
+            book: books,
+        }),
+    )))
 }
 
 #[post("/", data = "<req_book>")]
-pub async fn create(db: &State<DatabaseConnection>, user: AuthenicatedUser, req_book: Json<ReqBook>) -> Response<Json<ResBook>> {
+pub async fn create(
+    db: &State<DatabaseConnection>,
+    user: AuthenicatedUser,
+    req_book: Json<ReqBook>,
+) -> Response<Json<ResBook>> {
     let db = db as &DatabaseConnection;
 
     let book = book::ActiveModel {
@@ -74,13 +95,17 @@ pub async fn create(db: &State<DatabaseConnection>, user: AuthenicatedUser, req_
     let book = book.insert(db).await?;
 
     Ok(SuccessResponse((
-        Status::Created, 
+        Status::Created,
         Json(ResBook::from(&book)),
     )))
 }
 
 #[get("/<id>")]
-pub async fn show(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id: i32) -> Response<Json<ResBook>> {
+pub async fn show(
+    db: &State<DatabaseConnection>,
+    _user: AuthenicatedUser,
+    id: i32,
+) -> Response<Json<ResBook>> {
     let db = db as &DatabaseConnection;
 
     let book = Book::find_by_id(id).one(db).await?;
@@ -88,7 +113,10 @@ pub async fn show(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id: i
     let book = match book {
         Some(b) => b,
         None => {
-            return Err(super::ErrorResponse((Status::NotFound, "Cannot find a book with the specific id.".to_string())))
+            return Err(super::ErrorResponse((
+                Status::NotFound,
+                "Cannot find a book with the specific id.".to_string(),
+            )))
         }
     };
 
@@ -96,10 +124,12 @@ pub async fn show(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id: i
 }
 
 #[put("/<id>", data = "<req_book>")]
-pub async fn update(db: &State<DatabaseConnection>,
+pub async fn update(
+    db: &State<DatabaseConnection>,
     _user: AuthenicatedUser,
     id: i32,
-    req_book: Json<ReqBook>) -> Response<Json<ResBook>> {
+    req_book: Json<ReqBook>,
+) -> Response<Json<ResBook>> {
     let db = db as &DatabaseConnection;
 
     let mut book: book::ActiveModel = match Book::find_by_id(id).one(db).await? {
@@ -121,14 +151,15 @@ pub async fn update(db: &State<DatabaseConnection>,
 
     let book = book.update(db).await?;
 
-    Ok(SuccessResponse((
-        Status::Ok,
-        Json(ResBook::from(&book)),
-    )))
+    Ok(SuccessResponse((Status::Ok, Json(ResBook::from(&book)))))
 }
 
 #[delete("/<id>")]
-pub async fn delete(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id: i32) -> Response<String> {
+pub async fn delete(
+    db: &State<DatabaseConnection>,
+    _user: AuthenicatedUser,
+    id: i32,
+) -> Response<String> {
     let db = db as &DatabaseConnection;
 
     let book: book::ActiveModel = match Book::find_by_id(id).one(db).await? {
@@ -143,8 +174,5 @@ pub async fn delete(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id:
 
     book.delete(db).await?;
 
-    Ok(SuccessResponse((
-        Status::Ok,
-        "Book Deleted".to_string(),
-    )))
+    Ok(SuccessResponse((Status::Ok, "Book Deleted".to_string())))
 }

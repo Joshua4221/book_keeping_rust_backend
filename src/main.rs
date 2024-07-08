@@ -6,7 +6,8 @@ use sea_orm_migration::MigratorTrait;
 
 use env_logger;
 
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
 mod migrator;
 
@@ -29,15 +30,17 @@ pub struct AppConfig {
     jwt_secret: String,
 }
 
-impl Default for AppConfig{
+impl Default for AppConfig {
     fn default() -> Self {
-        Self { 
-            db_host: std::env::var("BOOKSTORE_DB_HOST").unwrap_or("localhost".to_string()), 
-            db_port: std::env::var("BOOKSTORE_DB_PORT").unwrap_or("3306".to_string()), 
-            db_username: std::env::var("BOOKSTORE_DB_USERNAME").unwrap_or("root".to_string()), 
-            db_password: std::env::var("BOOKSTORE_DB_PASSWORD").unwrap_or("".to_string()), 
-            db_database: std::env::var("BOOKSTORE_DB_DATABASE").unwrap_or("book_keeping".to_string()),
-            jwt_secret: std::env::var("BOOKSTORE_JWT_SECRET").expect("Please set the BOOKSTORE_JWT_SECRET env variable.")
+        Self {
+            db_host: std::env::var("BOOKSTORE_DB_HOST").unwrap_or("localhost".to_string()),
+            db_port: std::env::var("BOOKSTORE_DB_PORT").unwrap_or("3306".to_string()),
+            db_username: std::env::var("BOOKSTORE_DB_USERNAME").unwrap_or("root".to_string()),
+            db_password: std::env::var("BOOKSTORE_DB_PASSWORD").unwrap_or("".to_string()),
+            db_database: std::env::var("BOOKSTORE_DB_DATABASE")
+                .unwrap_or("book_keeping".to_string()),
+            jwt_secret: std::env::var("BOOKSTORE_JWT_SECRET")
+                .expect("Please set the BOOKSTORE_JWT_SECRET env variable."),
         }
     }
 }
@@ -48,7 +51,7 @@ fn index() -> Response<String> {
 }
 
 #[launch]
-async fn rocket () -> _ {
+async fn rocket() -> _ {
     dotenvy::dotenv().ok();
 
     env_logger::init();
@@ -60,38 +63,38 @@ async fn rocket () -> _ {
     Migrator::up(&db, None).await.unwrap();
 
     rocket::build()
-    .attach(CORS)
-    .manage(db)
-    .manage(config)
-    .mount("/", routes![options])
-    .mount("/", routes![index])
-    .mount(
-        "/auth", 
-        routes![
-            controllers::auth::sign_in,
-            controllers::auth::sign_up,
-            controllers::auth::me
-        ]
-    )
-    .mount(
-        "/authors", 
-        routes![
-            controllers::authors::index, 
-            controllers::authors::create, 
-            controllers::authors::show, 
-            controllers::authors::update, 
-            controllers::authors::delete,
-            controllers::authors::get_books
-        ]
-    )
-    .mount(
-        "/books", 
-        routes![
-            controllers::books::index, 
-            controllers::books::create, 
-            controllers::books::show, 
-            controllers::books::update, 
-            controllers::books::delete
-        ]
-    )
+        .attach(CORS)
+        .manage(db)
+        .manage(config)
+        .mount("/", routes![options])
+        .mount("/", routes![index])
+        .mount(
+            "/auth",
+            routes![
+                controllers::auth::sign_in,
+                controllers::auth::sign_up,
+                controllers::auth::me
+            ],
+        )
+        .mount(
+            "/authors",
+            routes![
+                controllers::authors::index,
+                controllers::authors::create,
+                controllers::authors::show,
+                controllers::authors::update,
+                controllers::authors::delete,
+                controllers::authors::get_books
+            ],
+        )
+        .mount(
+            "/books",
+            routes![
+                controllers::books::index,
+                controllers::books::create,
+                controllers::books::show,
+                controllers::books::update,
+                controllers::books::delete
+            ],
+        )
 }
