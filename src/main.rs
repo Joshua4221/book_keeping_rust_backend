@@ -4,8 +4,6 @@ use migrator::Migrator;
 use rocket::http::Status;
 use sea_orm_migration::MigratorTrait;
 
-use env_logger;
-
 #[macro_use]
 extern crate rocket;
 
