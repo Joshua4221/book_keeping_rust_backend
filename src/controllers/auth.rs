@@ -4,7 +4,7 @@ use bcrypt::{hash, verify, DEFAULT_COST};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use rocket::{
     http::Status,
-    serde::{self, json::Json, Deserialize, Serialize},
+    serde::{json::Json, Deserialize, Serialize},
     State,
 };
 
@@ -16,7 +16,7 @@ use crate::{
     entities::{prelude::*, user},
     AppConfig,
 };
-use sea_orm::{prelude::DateTimeUtc, *};
+use sea_orm::*;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]

@@ -1,7 +1,7 @@
 use sea_orm_migration::prelude::*;
 
-use super::m20220101_000001_create_user_table::{self, User};
-use super::m20240514_171241_create_author_table::{self, Author};
+use super::m20220101_000001_create_user_table::User;
+use super::m20240514_171241_create_author_table::Author;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;

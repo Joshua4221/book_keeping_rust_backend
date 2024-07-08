@@ -9,10 +9,9 @@ use rocket::{
 use sea_orm::*;
 
 use crate::entities::{author, prelude::*};
-use crate::{auth::AuthenicatedUser, entities::book};
+use crate::auth::AuthenicatedUser;
 
 use super::{
-    auth,
     books::{ResBook, ResBooklist},
     Response, SuccessResponse,
 };

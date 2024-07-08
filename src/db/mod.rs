@@ -1,7 +1,5 @@
 use sea_orm::*;
 
-use log::debug;
-
 use crate::AppConfig;
 
 pub(super) async fn connect(config: &AppConfig) -> Result<DatabaseConnection, DbErr> {
