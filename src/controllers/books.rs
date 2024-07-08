@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use super::{Response, SuccessResponse};
 
 use prelude::DateTimeUtc;
 use rocket::{
@@ -7,11 +7,10 @@ use rocket::{
     State,
 };
 use sea_orm::*;
+use std::time::SystemTime;
 
 use crate::auth::AuthenicatedUser;
 use crate::entities::{book, prelude::*};
-
-use super::{Response, SuccessResponse};
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]

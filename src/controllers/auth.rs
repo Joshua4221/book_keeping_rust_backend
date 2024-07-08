@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use super::{Response, SuccessResponse};
 
 use bcrypt::{hash, verify, DEFAULT_COST};
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -7,8 +7,8 @@ use rocket::{
     serde::{json::Json, Deserialize, Serialize},
     State,
 };
-
-use super::{Response, SuccessResponse};
+use sea_orm::*;
+use std::time::SystemTime;
 
 use crate::{
     auth::{AuthenicatedUser, Claims},
@@ -16,7 +16,6 @@ use crate::{
     entities::{prelude::*, user},
     AppConfig,
 };
-use sea_orm::*;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]

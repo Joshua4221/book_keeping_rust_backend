@@ -37,9 +37,6 @@ impl MigrationTrait for Migration {
             .await
     }
 
-    // .col(ColumnDef::new(User::CreatedAt).timestamp().default("DEFAULT_CURRENT_TIMESTAMP".to_owned()))
-    //                 .col(ColumnDef::new(User::UpdatedAt).timestamp().default("DEFAULT_CURRENT_TIMESTAMP".to_owned()))
-
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(User::Table).to_owned())

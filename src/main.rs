@@ -7,17 +7,12 @@ use sea_orm_migration::MigratorTrait;
 #[macro_use]
 extern crate rocket;
 
-mod migrator;
-
-mod db;
-
-mod entities;
-
-mod controllers;
-
-mod fairings;
-
 mod auth;
+mod controllers;
+mod db;
+mod entities;
+mod fairings;
+mod migrator;
 
 pub struct AppConfig {
     db_host: String,
