@@ -1,13 +1,19 @@
-use std::time::SystemTime;
+use super::{
+    books::{ResBook, ResBooklist},
+    Response, SuccessResponse,
+};
 
 use prelude::DateTimeUtc;
-use rocket::{http::Status, serde::{json::Json, Deserialize, Serialize}, State};
+use rocket::{
+    http::Status,
+    serde::{json::Json, Deserialize, Serialize},
+    State,
+};
 use sea_orm::*;
+use std::time::SystemTime;
 
-use crate::{auth::AuthenicatedUser, entities::book};
-use crate::entities::{prelude::*, author};
-
-use super::{auth, books::{ResBook, ResBooklist}, Response, SuccessResponse};
+use crate::auth::AuthenicatedUser;
+use crate::entities::{author, prelude::*};
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -20,28 +26,36 @@ pub struct ResAuthor {
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
-pub struct ResAuthorlist{
+pub struct ResAuthorlist {
     total: usize,
-    authors: Vec<ResAuthor>
+    authors: Vec<ResAuthor>,
 }
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct ReqAuthor{
+pub struct ReqAuthor {
     firstname: String,
     lastname: String,
     bio: String,
 }
 
 impl From<&author::Model> for ResAuthor {
-    fn from(a: &author::Model) -> Self{
-        Self { id: a.id, firstname: a.firstname.to_owned(), lastname: a.lastname.to_owned(), bio: a.bio.to_owned() }
+    fn from(a: &author::Model) -> Self {
+        Self {
+            id: a.id,
+            firstname: a.firstname.to_owned(),
+            lastname: a.lastname.to_owned(),
+            bio: a.bio.to_owned(),
+        }
     }
 }
 
 #[get("/")]
-pub async fn index(db: &State<DatabaseConnection>, _user: AuthenicatedUser) -> Response<Json<ResAuthorlist>> {
-    let db = db as &DatabaseConnection;
+pub async fn index(
+    db: &State<DatabaseConnection>,
+    _user: AuthenicatedUser,
+) -> Response<Json<ResAuthorlist>> {
+    let db: &DatabaseConnection = db;
 
     let authors = Author::find()
         .order_by_desc(author::Column::UpdatedAt)
@@ -51,14 +65,24 @@ pub async fn index(db: &State<DatabaseConnection>, _user: AuthenicatedUser) -> R
         .map(ResAuthor::from)
         .collect::<Vec<_>>();
 
-    Ok(SuccessResponse((Status::Ok, Json(ResAuthorlist{total: authors.len(), authors}))))
+    Ok(SuccessResponse((
+        Status::Ok,
+        Json(ResAuthorlist {
+            total: authors.len(),
+            authors,
+        }),
+    )))
 }
 
 #[post("/", data = "<req_author>")]
-pub async fn create(db: &State<DatabaseConnection>, user: AuthenicatedUser, req_author: Json<ReqAuthor>) -> Response<Json<ResAuthor>> {
-    let db = db as &DatabaseConnection;
+pub async fn create(
+    db: &State<DatabaseConnection>,
+    user: AuthenicatedUser,
+    req_author: Json<ReqAuthor>,
+) -> Response<Json<ResAuthor>> {
+    let db: &DatabaseConnection = db;
 
-    let author = author::ActiveModel{
+    let author = author::ActiveModel {
         user_id: Set(user.id),
         firstname: Set(req_author.firstname.to_owned()),
         lastname: Set(req_author.lastname.to_owned()),
@@ -69,36 +93,53 @@ pub async fn create(db: &State<DatabaseConnection>, user: AuthenicatedUser, req_
     let author = author.insert(db).await?;
 
     Ok(SuccessResponse((
-        Status::Created, 
+        Status::Created,
         Json(ResAuthor::from(&author)),
     )))
 }
 
 #[get("/<id>")]
-pub async fn show(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id: i32) -> Response<Json<ResAuthor>> {
-    let db = db as &DatabaseConnection;
+pub async fn show(
+    db: &State<DatabaseConnection>,
+    _user: AuthenicatedUser,
+    id: i32,
+) -> Response<Json<ResAuthor>> {
+    let db: &DatabaseConnection = db;
 
     let author = Author::find_by_id(id).one(db).await?;
 
     let author = match author {
         Some(a) => a,
         None => {
-            return Err(super::ErrorResponse((Status::NotFound, "Cannot find author with the specific id.".to_string())))
+            return Err(super::ErrorResponse((
+                Status::NotFound,
+                "Cannot find author with the specific id.".to_string(),
+            )))
         }
     };
 
-    Ok(SuccessResponse((Status::Ok, Json(ResAuthor::from(&author)))))
+    Ok(SuccessResponse((
+        Status::Ok,
+        Json(ResAuthor::from(&author)),
+    )))
 }
 
 #[put("/<id>", data = "<req_author>")]
-pub async fn update(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id: i32, req_author: Json<ReqAuthor>) -> Response<Json<ResAuthor>> {
-    let db = db as &DatabaseConnection;
-
+pub async fn update(
+    db: &State<DatabaseConnection>,
+    _user: AuthenicatedUser,
+    id: i32,
+    req_author: Json<ReqAuthor>,
+) -> Response<Json<ResAuthor>> {
+    let db: &DatabaseConnection = db;
 
     let mut author: author::ActiveModel = match Author::find_by_id(id).one(db).await? {
         Some(a) => a.into(),
         None => {
-            return Err(super::ErrorResponse((Status::NotFound, "Cannot find author with the specific id.".to_string())))
+            return Err(super::ErrorResponse((
+                Status::NotFound,
+                "Cannot find author with the specific id.".to_string(),
+            )))
         }
     };
 
@@ -109,19 +150,28 @@ pub async fn update(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id:
     author.updated_at = Set(Some(DateTimeUtc::from(SystemTime::now())));
 
     let author = author.update(db).await?;
-    
-    Ok(SuccessResponse((Status::Ok, Json(ResAuthor::from(&author)))))
+
+    Ok(SuccessResponse((
+        Status::Ok,
+        Json(ResAuthor::from(&author)),
+    )))
 }
 
 #[delete("/<id>")]
-pub async fn delete(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id: i32) -> Response<String> {
-    let db = db as &DatabaseConnection;
-
+pub async fn delete(
+    db: &State<DatabaseConnection>,
+    _user: AuthenicatedUser,
+    id: i32,
+) -> Response<String> {
+    let db: &DatabaseConnection = db;
 
     let author: author::ActiveModel = match Author::find_by_id(id).one(db).await? {
         Some(a) => a.into(),
         None => {
-            return Err(super::ErrorResponse((Status::NotFound, "Cannot find author with the specific id.".to_string())))
+            return Err(super::ErrorResponse((
+                Status::NotFound,
+                "Cannot find author with the specific id.".to_string(),
+            )))
         }
     };
 
@@ -131,25 +181,30 @@ pub async fn delete(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id:
 }
 
 #[get("/<id>/books")]
-pub async fn get_books(db: &State<DatabaseConnection>, _user: AuthenicatedUser, id: i32) -> Response<Json<ResBooklist>> {
-    let db = db as &DatabaseConnection;
+pub async fn get_books(
+    db: &State<DatabaseConnection>,
+    _user: AuthenicatedUser,
+    id: i32,
+) -> Response<Json<ResBooklist>> {
+    let db: &DatabaseConnection = db;
 
     let author = match Author::find_by_id(id).one(db).await? {
         Some(a) => a,
         None => {
-            return Err(super::ErrorResponse((Status::NotFound, "Cannot find author with the specific id.".to_string())))
+            return Err(super::ErrorResponse((
+                Status::NotFound,
+                "Cannot find author with the specific id.".to_string(),
+            )))
         }
     };
 
-    let books= author.find_related(Book).all(db).await?;
+    let books = author.find_related(Book).all(db).await?;
 
-
-
-     Ok(SuccessResponse((
-        Status::Ok, 
+    Ok(SuccessResponse((
+        Status::Ok,
         Json(ResBooklist {
             total: books.len(),
-            book: books.iter().map(ResBook::from).collect::<Vec<_>>()
-        })
+            book: books.iter().map(ResBook::from).collect::<Vec<_>>(),
+        }),
     )))
 }

@@ -6,7 +6,6 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-       
         manager
             .create_table(
                 Table::create()
@@ -23,19 +22,22 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(User::Password).string().not_null())
                     .col(ColumnDef::new(User::Firstname).string().null())
                     .col(ColumnDef::new(User::Lastname).string().null())
-                    .col(ColumnDef::new(User::CreatedAt).timestamp().extra("DEFAULT CURRENT_TIMESTAMP".to_owned()))
-                    .col(ColumnDef::new(User::UpdatedAt).timestamp().extra("DEFAULT CURRENT_TIMESTAMP".to_owned()))
+                    .col(
+                        ColumnDef::new(User::CreatedAt)
+                            .timestamp()
+                            .extra("DEFAULT CURRENT_TIMESTAMP".to_owned()),
+                    )
+                    .col(
+                        ColumnDef::new(User::UpdatedAt)
+                            .timestamp()
+                            .extra("DEFAULT CURRENT_TIMESTAMP".to_owned()),
+                    )
                     .to_owned(),
             )
             .await
     }
 
-
-    // .col(ColumnDef::new(User::CreatedAt).timestamp().default("DEFAULT_CURRENT_TIMESTAMP".to_owned()))
-    //                 .col(ColumnDef::new(User::UpdatedAt).timestamp().default("DEFAULT_CURRENT_TIMESTAMP".to_owned()))
-
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-
         manager
             .drop_table(Table::drop().table(User::Table).to_owned())
             .await
