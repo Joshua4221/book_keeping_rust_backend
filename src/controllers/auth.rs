@@ -36,9 +36,7 @@ pub async fn sign_in(
     config: &State<AppConfig>,
     req_sign_in: Json<ReqSignIn>,
 ) -> Response<Json<ResSignIn>> {
-    let db = db as &DatabaseConnection;
-
-    let config = config as &AppConfig;
+    let db: &DatabaseConnection = db;
 
     let u = match User::find()
         .filter(user::Column::Email.eq(&req_sign_in.email))
@@ -64,7 +62,7 @@ pub async fn sign_in(
     }
 
     let claims = Claims {
-        sub: u.id as i32,
+        sub: u.id,
         role: "user".to_string(),
         exp: SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
@@ -97,7 +95,7 @@ pub async fn sign_up(
     db: &State<DatabaseConnection>,
     req_sign_up: Json<ReqSignUp>,
 ) -> Response<String> {
-    let db = db as &DatabaseConnection;
+    let db: &DatabaseConnection = db;
 
     if User::find()
         .filter(user::Column::Email.eq(&req_sign_up.email))
@@ -138,7 +136,7 @@ pub struct ResMe {
 
 #[get("/me")]
 pub async fn me(db: &State<DatabaseConnection>, user: AuthenicatedUser) -> Response<Json<ResMe>> {
-    let db = db as &DatabaseConnection;
+    let db: &DatabaseConnection = db;
 
     let u = User::find_by_id(user.id).one(db).await?.unwrap();
 

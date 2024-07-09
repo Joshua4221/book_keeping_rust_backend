@@ -55,7 +55,7 @@ pub async fn index(
     db: &State<DatabaseConnection>,
     _user: AuthenicatedUser,
 ) -> Response<Json<ResAuthorlist>> {
-    let db = db as &DatabaseConnection;
+    let db: &DatabaseConnection = db;
 
     let authors = Author::find()
         .order_by_desc(author::Column::UpdatedAt)
@@ -80,7 +80,7 @@ pub async fn create(
     user: AuthenicatedUser,
     req_author: Json<ReqAuthor>,
 ) -> Response<Json<ResAuthor>> {
-    let db = db as &DatabaseConnection;
+    let db: &DatabaseConnection = db;
 
     let author = author::ActiveModel {
         user_id: Set(user.id),
@@ -104,7 +104,7 @@ pub async fn show(
     _user: AuthenicatedUser,
     id: i32,
 ) -> Response<Json<ResAuthor>> {
-    let db = db as &DatabaseConnection;
+    let db: &DatabaseConnection = db;
 
     let author = Author::find_by_id(id).one(db).await?;
 
@@ -131,7 +131,7 @@ pub async fn update(
     id: i32,
     req_author: Json<ReqAuthor>,
 ) -> Response<Json<ResAuthor>> {
-    let db = db as &DatabaseConnection;
+    let db: &DatabaseConnection = db;
 
     let mut author: author::ActiveModel = match Author::find_by_id(id).one(db).await? {
         Some(a) => a.into(),
@@ -163,7 +163,7 @@ pub async fn delete(
     _user: AuthenicatedUser,
     id: i32,
 ) -> Response<String> {
-    let db = db as &DatabaseConnection;
+    let db: &DatabaseConnection = db;
 
     let author: author::ActiveModel = match Author::find_by_id(id).one(db).await? {
         Some(a) => a.into(),
@@ -186,7 +186,7 @@ pub async fn get_books(
     _user: AuthenicatedUser,
     id: i32,
 ) -> Response<Json<ResBooklist>> {
-    let db = db as &DatabaseConnection;
+    let db: &DatabaseConnection = db;
 
     let author = match Author::find_by_id(id).one(db).await? {
         Some(a) => a,

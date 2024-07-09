@@ -29,6 +29,7 @@ impl Default for AppConfig {
             db_host: std::env::var("BOOKSTORE_DB_HOST").unwrap_or("localhost".to_string()),
             db_port: std::env::var("BOOKSTORE_DB_PORT").unwrap_or("3306".to_string()),
             db_username: std::env::var("BOOKSTORE_DB_USERNAME").unwrap_or("root".to_string()),
+            //TODO: It is not a good practice to allow empty password. Give some default value.
             db_password: std::env::var("BOOKSTORE_DB_PASSWORD").unwrap_or("".to_string()),
             db_database: std::env::var("BOOKSTORE_DB_DATABASE")
                 .unwrap_or("book_keeping".to_string()),
@@ -38,6 +39,7 @@ impl Default for AppConfig {
     }
 }
 
+//TODO: It does not give any functionality, please remove it.
 #[get("/")]
 fn index() -> Response<String> {
     Ok(SuccessResponse((Status::Ok, "Hello World".to_string())))
@@ -51,8 +53,10 @@ async fn rocket() -> _ {
 
     let config = AppConfig::default();
 
+    //TODO: It can panic but please handle the error properly. Avoid using unwrap.
     let db = db::connect(&config).await.unwrap();
 
+    //TODO: It can panic but please handle the error properly. Avoid using unwrap.
     Migrator::up(&db, None).await.unwrap();
 
     rocket::build()
